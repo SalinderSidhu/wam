@@ -13,7 +13,7 @@ func main() {
 	app.Author = "Salinder"
 	app.Email = "salinder.sid@gmail.com"
 	app.Version = cmd.Version
-	app.Commands = cmd.Commands
+	app.Commands = cmd.Commands()
 
 	app.Run(os.Args)
 }

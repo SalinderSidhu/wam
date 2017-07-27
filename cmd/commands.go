@@ -1,18 +1,33 @@
 package cmd
 
 import (
+	"fmt"
+
+	"./addon"
+	"./curse"
 	"github.com/urfave/cli"
 )
 
-// Commands represents a collection of CLI command objects
-var Commands = []cli.Command{
-	commandGet,
+// CommandWrapper wraps dependencies used by CLI commands
+type CommandWrapper struct {
+	util *addon.Util
 }
 
-var commandGet = cli.Command{
-	Name:   "get",
-	Usage:  "Find and download an addon with a specific ID or name",
-	Action: doGet,
+// Commands returns an array of CLI commands
+func Commands() []cli.Command {
+	// Create dependencies and Wrapper
+	u := curse.NewUtil()
+	w := CommandWrapper{util: &u}
+	// Return array of CLI commands
+	return []cli.Command{
+		cli.Command{
+			Name:   "get",
+			Usage:  "Download an addon with a specific ID or name",
+			Action: w.doGet,
+		},
+	}
 }
 
-func doGet(c *cli.Context) {}
+func (w *CommandWrapper) doGet(c *cli.Context) {
+	fmt.Println("Not Implemented!")
+}
