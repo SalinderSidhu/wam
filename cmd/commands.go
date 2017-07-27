@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"fmt"
+	"log"
 
 	"./addon"
 	"./curse"
@@ -10,14 +10,14 @@ import (
 
 // CommandWrapper wraps dependencies used by CLI commands
 type CommandWrapper struct {
-	util *addon.Util
+	util addon.Util
 }
 
 // Commands returns an array of CLI commands
 func Commands() []cli.Command {
 	// Create dependencies and Wrapper
 	u := curse.NewUtil()
-	w := CommandWrapper{util: &u}
+	w := CommandWrapper{util: u}
 	// Return array of CLI commands
 	return []cli.Command{
 		cli.Command{
@@ -29,5 +29,10 @@ func Commands() []cli.Command {
 }
 
 func (w *CommandWrapper) doGet(c *cli.Context) {
-	fmt.Println("Not Implemented!")
+	for _, arg := range c.Args() {
+		err := w.util.Download(arg)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 }
