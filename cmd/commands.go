@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 
 	"./addon"
@@ -24,15 +25,24 @@ func Commands() []cli.Command {
 			Name:   "get",
 			Usage:  "Download an addon with a specific ID or name",
 			Action: w.doGet,
+			Flags: []cli.Flag{
+				cli.BoolFlag{
+					Name:  "info, i",
+					Usage: "Display addon information",
+				},
+			},
 		},
 	}
 }
 
 func (w *CommandWrapper) doGet(c *cli.Context) {
 	for _, arg := range c.Args() {
-		err := w.util.Download(arg)
+		// Get data for each addon
+		a, err := w.util.GetData(arg)
 		if err != nil {
 			log.Fatal(err)
 		}
+		// Print the name and version
+		fmt.Printf("Addon: %s %s\n", a.Name, a.Version)
 	}
 }

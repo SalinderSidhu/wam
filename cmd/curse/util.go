@@ -1,15 +1,13 @@
 package curse
 
 import (
+	"errors"
 	"fmt"
-	"io"
-	"io/ioutil"
-	"net/http"
-	"os"
-	"regexp"
+	"strconv"
 	"strings"
 
 	"../addon"
+	"github.com/PuerkitoBio/goquery"
 )
 
 /*
@@ -17,69 +15,55 @@ Util represents web and file utilities for downloading and managing World of
 Warcraft addons from the Curse website
 */
 type Util struct {
-	addonURL         string
-	addonDownloadURL string
+	addonURL string
 }
 
 // NewUtil creates an instance of Utils
 func NewUtil() addon.Util {
 	return &Util{
-		addonURL:         "https://mods.curse.com/addons/wow/%s",
-		addonDownloadURL: "https://mods.curse.com/addons/wow/%s/download",
+		addonURL: "https://mods.curse.com/addons/wow/%s",
 	}
 }
 
 /*
-Download the current version of the Curse addon. Return an error if any occur,
-return nil otherwise.
+GetData returns an addon data object containing information about a Curse addon
+using the specified id and a nil error. Return nil for the addon data and a
+specific error otherwise.
 */
-func (u *Util) Download(id string) error {
+func (u *Util) GetData(id string) (*addon.Data, error) {
 	// Resolve the addon page from Curse
-	page, err := u.resolve(fmt.Sprintf(u.addonDownloadURL, id))
+	doc, err := goquery.NewDocument(fmt.Sprintf(u.addonURL, id))
 	if err != nil {
-		return err
+		return nil, err
 	}
-	// Parse the addon page for the download URL
-	fileURL, err := u.parse(page, `data-href="([^"]*)`, `data-href="`)
+	// Check for 404 page if the Curse addon was not found
+	h := doc.Find("#content section header h2").First().Text()
+	if h == "Not found" {
+		return nil, errors.New("Addon not found")
+	}
+	// Parse specific information from the page
+	n := doc.Find("#project-overview > header > h2").First().Text()
+	v := strings.Split(doc.Find("li.newest-file").First().Text(), ": ")[1]
+	d, _ := doc.Find("li.updated abbr").Attr("data-epoch")
+	t, err := strconv.ParseInt(d, 10, 64)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	// Obtain the file contents using a GET request
-	res, err := http.Get(fileURL)
+	// Parse download link and obtain the file url of the addon
+	dDoc, err := goquery.NewDocument(fmt.Sprintf(u.addonURL, id) + "/download")
 	if err != nil {
-		return err
+		return nil, err
 	}
-	defer res.Body.Close()
-	// Create a file to save the downloaded content
-	out, err := os.Create(fmt.Sprintf("DL_%s.zip", id))
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-	// Copy the data from the request into the output file
-	_, err = io.Copy(out, res.Body)
-	if err != nil {
-		return err
-	}
-	return nil
+	l, _ := dDoc.Find("#file-download a").Attr("data-href")
+
+	return &addon.Data{Name: n, Date: t, Version: v, URL: l}, nil
 }
 
-func (u *Util) parse(s string, regex string, split string) (string, error) {
-	re, err := regexp.Compile(regex)
-	if err != nil {
-		return "", err
-	}
-	rx := re.FindStringSubmatch(s)
-	return strings.Split(rx[0], split)[1], nil
-}
-
-func (u *Util) resolve(url string) (string, error) {
-	res, err := http.Get(url)
-	if err != nil {
-		return "", err
-	}
-	defer res.Body.Close()
-
-	bytes, _ := ioutil.ReadAll(res.Body)
-	return string(bytes), nil
+/*
+Download downloads the latest version of a Curse addon from the addon data.
+Return the file name of the downloaded addon and a nil error. Return nil for
+the file name and a specific error otherwise.
+*/
+func (u *Util) Download(d *addon.Data) (string, error) {
+	return "", nil
 }

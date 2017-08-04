@@ -17,6 +17,7 @@
 
 This application requires the following go packages:
 * **cli** (`go get github.com/urfave/cli`)
+* **goquery** (`go get github.com/PuerkitoBio/goquery`)
 
 # License
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](/LICENSE.md)
