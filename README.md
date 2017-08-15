@@ -16,8 +16,13 @@
 > Version `1.8` or higher is recommended.
 
 This application requires the following go packages:
-* **cli** (`go get github.com/urfave/cli`)
-* **goquery** (`go get github.com/PuerkitoBio/goquery`)
+
+Package | Command
+:--: | --
+cli | `go get github.com/urfave/cli`
+goquery | `go get github.com/PuerkitoBio/goquery`
 
 # License
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](/LICENSE.md)
+
+**THIS APPLICATION IS IN NO WAY AFFILIATED OR ENDORSED BY ACTIVISION BLIZZARD**
