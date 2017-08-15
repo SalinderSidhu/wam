@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 
 	"./addon"
 	"./curse"
@@ -37,12 +36,26 @@ func Commands() []cli.Command {
 
 func (w *CommandWrapper) doGet(c *cli.Context) {
 	for _, arg := range c.Args() {
+		fmt.Printf("[INFO] searching for %s...\n", arg)
 		// Get data for each addon
-		a, err := w.util.GetData(arg)
+		addon, err := w.util.GetData(arg)
 		if err != nil {
-			log.Fatal(err)
+			fmt.Printf("[ERROR] %s\n", err.Error())
+			return
 		}
-		// Print the name and version
-		fmt.Printf("Addon: %s %s\n", a.Name, a.Version)
+		// Determine action (display info or download) based on flag
+		if c.Bool("info") {
+			// Print the addon's name and version
+			fmt.Printf("[OK] found %s %s\n", addon.Name, addon.Version)
+		} else {
+			// Download the addon
+			_, err := w.util.Download(addon)
+			if err != nil {
+				fmt.Printf("[ERROR] %s\n", err.Error())
+				return
+			}
+			// Print the addon's name and version
+			fmt.Printf("[OK] downloaded %s %s\n", addon.Name, addon.Version)
+		}
 	}
 }

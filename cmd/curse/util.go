@@ -3,6 +3,9 @@ package curse
 import (
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
@@ -56,7 +59,7 @@ func (u *Util) GetData(id string) (*addon.Data, error) {
 	}
 	l, _ := dDoc.Find("#file-download a").Attr("data-href")
 
-	return &addon.Data{Name: n, Date: t, Version: v, URL: l}, nil
+	return &addon.Data{ID: id, Name: n, Date: t, Version: v, URL: l}, nil
 }
 
 /*
@@ -65,5 +68,22 @@ Return the file name of the downloaded addon and a nil error. Return nil for
 the file name and a specific error otherwise.
 */
 func (u *Util) Download(d *addon.Data) (string, error) {
-	return "", nil
+	// Obtain the addon file content using a GET request
+	res, err := http.Get(d.URL)
+	if err != nil {
+		return "", err
+	}
+	defer res.Body.Close()
+	// Create a file to save the downloaded content
+	out, err := os.Create(fmt.Sprintf("%s.zip", d.ID))
+	if err != nil {
+		return "", err
+	}
+	defer out.Close()
+	// Copy the data from the request into the output file
+	_, err = io.Copy(out, res.Body)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%s.zip", d.ID), nil
 }

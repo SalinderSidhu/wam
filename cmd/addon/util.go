@@ -11,6 +11,7 @@ type Util interface {
 
 // Data represents a structure containing specific information about an addon
 type Data struct {
+	ID      string
 	Name    string
 	Date    int64
 	Version string
