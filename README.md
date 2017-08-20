@@ -3,10 +3,19 @@
 
 # Features
 
+## Implemented
+
+## To do...
+- [ ] Addon id alias database
+- [ ] Backup addon saved variables
+- [ ] Search for addons using keywords and/or filters
+
 # Table of Contents
 
 * [Getting Started](#getting-started)
     * [Requirements](#requirements)
+    * [Configuration](#configuration)
+* [Usage](#usage)
 * [License](#license)
 
 # Getting Started
@@ -21,6 +30,10 @@ Package | Command
 :--: | --
 cli | `go get github.com/urfave/cli`
 goquery | `go get github.com/PuerkitoBio/goquery`
+
+## Configuration
+
+# Usage
 
 # License
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](/LICENSE.md)
