@@ -22,14 +22,13 @@ func Commands() []cli.Command {
 	return []cli.Command{
 		cli.Command{
 			Name:   "get",
-			Usage:  "Download an addon with a specific ID or name",
+			Usage:  "Display information about an addon",
 			Action: w.doGet,
-			Flags: []cli.Flag{
-				cli.BoolFlag{
-					Name:  "info, i",
-					Usage: "Display addon information",
-				},
-			},
+		},
+		cli.Command{
+			Name:   "install",
+			Usage:  "Download and install an addon",
+			Action: w.doInstall,
 		},
 	}
 }
@@ -37,25 +36,25 @@ func Commands() []cli.Command {
 func (w *CommandWrapper) doGet(c *cli.Context) {
 	for _, arg := range c.Args() {
 		fmt.Printf("[INFO] searching for %s...\n", arg)
-		// Get data for each addon
-		addon, err := w.util.GetData(arg)
+		// Get addon information
+		info, err := w.util.GetInfo(arg)
 		if err != nil {
 			fmt.Printf("[ERROR] %s\n", err.Error())
-			return
+			continue
 		}
-		// Determine action (display info or download) based on flag
-		if c.Bool("info") {
-			// Print the addon's name and version
-			fmt.Printf("[OK] found %s %s\n", addon.Name, addon.Version)
-		} else {
-			// Download the addon
-			_, err := w.util.Download(addon)
-			if err != nil {
-				fmt.Printf("[ERROR] %s\n", err.Error())
-				return
-			}
-			// Print the addon's name and version
-			fmt.Printf("[OK] downloaded %s %s\n", addon.Name, addon.Version)
+		fmt.Printf("[OK] found %s\n", info)
+	}
+}
+
+func (w *CommandWrapper) doInstall(c *cli.Context) {
+	for _, arg := range c.Args() {
+		fmt.Printf("[INFO] searching for %s...\n", arg)
+		// Download the addon
+		err := w.util.Download(arg)
+		if err != nil {
+			fmt.Printf("[ERROR] %s\n", err.Error())
+			continue
 		}
+		fmt.Printf("[OK] downloaded %s\n", arg)
 	}
 }
