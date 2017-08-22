@@ -1,13 +1,13 @@
 package curse
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"../addon"
 	"github.com/PuerkitoBio/goquery"
@@ -28,12 +28,7 @@ func NewUtil() addon.Util {
 	}
 }
 
-/*
-GetData returns an addon data object containing information about a Curse addon
-using the specified id and a nil error. Return nil for the addon data and a
-specific error otherwise.
-*/
-func (u *Util) GetData(id string) (*addon.Data, error) {
+func (u *Util) parse(id string) (*addon.Data, error) {
 	// Resolve the addon page from Curse
 	doc, err := goquery.NewDocument(fmt.Sprintf(u.addonURL, id))
 	if err != nil {
@@ -42,13 +37,13 @@ func (u *Util) GetData(id string) (*addon.Data, error) {
 	// Check for 404 page if the Curse addon was not found
 	h := doc.Find("#content section header h2").First().Text()
 	if h == "Not found" {
-		return nil, errors.New("Addon not found")
+		return nil, fmt.Errorf("%s not found on Curse", id)
 	}
 	// Parse specific information from the page
 	n := doc.Find("#project-overview > header > h2").First().Text()
 	v := strings.Split(doc.Find("li.newest-file").First().Text(), ": ")[1]
 	d, _ := doc.Find("li.updated abbr").Attr("data-epoch")
-	t, err := strconv.ParseInt(d, 10, 64)
+	e, err := strconv.ParseInt(d, 10, 64)
 	if err != nil {
 		return nil, err
 	}
@@ -59,31 +54,49 @@ func (u *Util) GetData(id string) (*addon.Data, error) {
 	}
 	l, _ := dDoc.Find("#file-download a").Attr("data-href")
 
-	return &addon.Data{ID: id, Name: n, Date: t, Version: v, URL: l}, nil
+	return &addon.Data{ID: id, Name: n, Epoch: e, Version: v, URL: l}, nil
 }
 
 /*
-Download downloads the latest version of a Curse addon from the addon data.
-Return the file name of the downloaded addon and a nil error. Return nil for
-the file name and a specific error otherwise.
+GetInfo returns a string containing the following information about an addon
+(specified by id) from curse: name, date and version
 */
-func (u *Util) Download(d *addon.Data) (string, error) {
-	// Obtain the addon file content using a GET request
-	res, err := http.Get(d.URL)
+func (u *Util) GetInfo(id string) (string, error) {
+	// Parse id an obtain addon data from curse
+	data, err := u.parse(id)
 	if err != nil {
 		return "", err
+	}
+	return fmt.Sprintf("%s (%s) Updated: %s", data.Name, data.Version,
+		time.Unix(data.Epoch, 0).Format(time.RFC822Z)), nil
+}
+
+/*
+Download function finds and downloads the latest version of an addon (specified
+by id) from Curse. Return an error if one occured, otherwise return nil
+*/
+func (u *Util) Download(id string) error {
+	// Parse id and obtain addon data from curse
+	data, err := u.parse(id)
+	if err != nil {
+		return err
+	}
+	// Obtain the addon file content using a GET request
+	res, err := http.Get(data.URL)
+	if err != nil {
+		return err
 	}
 	defer res.Body.Close()
-	// Create a file to save the downloaded content
-	out, err := os.Create(fmt.Sprintf("%s.zip", d.ID))
+	// Create a file to save the downloaded addon
+	out, err := os.Create(fmt.Sprintf("%s.zip", id))
 	if err != nil {
-		return "", err
+		return err
 	}
 	defer out.Close()
-	// Copy the data from the request into the output file
+	// Copy the data from the request body into the output file
 	_, err = io.Copy(out, res.Body)
 	if err != nil {
-		return "", err
+		return err
 	}
-	return fmt.Sprintf("%s.zip", d.ID), nil
+	return nil
 }
