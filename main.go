@@ -9,9 +9,9 @@ import (
 
 func main() {
 	app := cli.NewApp()
-	app.Name = "wam"
-	app.Author = "Salinder"
-	app.Email = "salinder.sid@gmail.com"
+	app.Name = cmd.Name
+	app.Email = cmd.Email
+	app.Author = cmd.Author
 	app.Version = cmd.Version
 	app.Commands = cmd.Commands()
 

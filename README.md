@@ -3,9 +3,7 @@
 
 # Features
 
-## Implemented
-
-## To do...
+### To do...
 - [ ] Addon id alias database
 - [ ] Backup addon saved variables
 - [ ] Search for addons using keywords and/or filters
@@ -21,8 +19,8 @@
 # Getting Started
 
 ## Requirements
-* [`Go Programming Language`](https://golang.org/)
-> Version `1.8` or higher is recommended.
+* [`The Go Programming Language`](https://golang.org/)
+> Version 1.8 or higher is recommended.
 
 This application requires the following go packages:
 
@@ -38,4 +36,4 @@ goquery | `go get github.com/PuerkitoBio/goquery`
 # License
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](/LICENSE.md)
 
-**THIS APPLICATION IS IN NO WAY AFFILIATED OR ENDORSED BY ACTIVISION BLIZZARD**
+**THIS APPLICATION IS IN NO WAY AFFILIATED OR ENDORSED BY BLIZZARD ENTERTAINMENT**

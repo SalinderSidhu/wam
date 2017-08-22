@@ -15,7 +15,7 @@ import (
 
 /*
 Util represents web and file utilities for downloading and managing World of
-Warcraft addons from the Curse website
+Warcraft addons from the Curse website.
 */
 type Util struct {
 	addonURL string
@@ -59,7 +59,7 @@ func (u *Util) parse(id string) (*addon.Data, error) {
 
 /*
 GetInfo returns a string containing the following information about an addon
-(specified by id) from curse: name, date and version
+(specified by id) from curse: name, date and version.
 */
 func (u *Util) GetInfo(id string) (string, error) {
 	// Parse id an obtain addon data from curse
@@ -73,7 +73,7 @@ func (u *Util) GetInfo(id string) (string, error) {
 
 /*
 Download function finds and downloads the latest version of an addon (specified
-by id) from Curse. Return an error if one occured, otherwise return nil
+by id) from Curse. Return an error if one occured, otherwise return nil.
 */
 func (u *Util) Download(id string) error {
 	// Parse id and obtain addon data from curse
