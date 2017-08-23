@@ -1,10 +1,12 @@
 package curse
 
 import (
+	"archive/zip"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -69,6 +71,53 @@ func (u *Util) GetInfo(id string) (string, error) {
 	}
 	return fmt.Sprintf("%s (%s) Updated: %s", data.Name, data.Version,
 		time.Unix(data.Epoch, 0).Format(time.RFC822Z)), nil
+}
+
+/*
+ExtractZip extracts the contents of a zip file from src to dest. Return an
+error if one occured.
+*/
+func (u *Util) ExtractZip(src, dest string) error {
+	// Open zip file for reading
+	r, err := zip.OpenReader(src)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+	// Open and read each file and/or folder
+	for _, f := range r.File {
+		rc, err := f.Open()
+		if err != nil {
+			return err
+		}
+		defer rc.Close()
+		// Create files and folders at dest from zip contents
+		fpath := filepath.Join(dest, f.Name)
+		if f.FileInfo().IsDir() {
+			os.MkdirAll(fpath, f.Mode())
+		} else {
+			var fdir string
+			lastIndex := strings.LastIndex(fpath, string(os.PathSeparator))
+			if lastIndex > -1 {
+				fdir = fpath[:lastIndex]
+			}
+			err = os.MkdirAll(fdir, f.Mode())
+			if err != nil {
+				return err
+			}
+			f, err := os.OpenFile(
+				fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+			_, err = io.Copy(f, rc)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 /*
