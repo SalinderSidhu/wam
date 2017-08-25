@@ -14,6 +14,7 @@
     * [Requirements](#requirements)
     * [Configuration](#configuration)
 * [Usage](#usage)
+* [Credits](#credits)
 * [License](#license)
 
 # Getting Started
@@ -32,6 +33,10 @@ goquery | `go get github.com/PuerkitoBio/goquery`
 ## Configuration
 
 # Usage
+
+# Credits
+
+Inspired by [wow-am](https://www.npmjs.com/package/wow-am)
 
 # License
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](/LICENSE.md)

@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"time"
 
 	"../addon"
 	"github.com/PuerkitoBio/goquery"
@@ -28,6 +27,41 @@ func NewUtil() addon.Util {
 	return &Util{
 		addonURL: "https://mods.curse.com/addons/wow/%s",
 	}
+}
+
+/*
+GetData returns an addon data object parsed from Curse using a curse addon id.
+*/
+func (u *Util) GetData(id string) (*addon.Data, error) {
+	// Parse id an obtain addon data from curse
+	data, err := u.parse(id)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+/*
+Install downloads, extracts and installs an addon from Curse using a curse
+addon id. Return an error if one occured.
+*/
+func (u *Util) Install(id string) error {
+	// Parse id and obtain addon data from curse
+	data, err := u.parse(id)
+	if err != nil {
+		return err
+	}
+	// Download the addon using the URL link
+	err = u.downloadURL(data.URL, fmt.Sprintf("%s.zip", id))
+	if err != nil {
+		return err
+	}
+	// Extract the addon zip file
+	err = u.extractZip(fmt.Sprintf("%s.zip", id), "./extracted")
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (u *Util) parse(id string) (*addon.Data, error) {
@@ -55,29 +89,31 @@ func (u *Util) parse(id string) (*addon.Data, error) {
 		return nil, err
 	}
 	l, _ := dDoc.Find("#file-download a").Attr("data-href")
-
-	return &addon.Data{ID: id, Name: n, Epoch: e, Version: v, URL: l}, nil
+	return &addon.Data{Name: n, Epoch: e, Version: v, URL: l}, nil
 }
 
-/*
-GetInfo returns a string containing the following information about an addon
-(specified by id) from curse: name, date and version.
-*/
-func (u *Util) GetInfo(id string) (string, error) {
-	// Parse id an obtain addon data from curse
-	data, err := u.parse(id)
+func (u *Util) downloadURL(url, fname string) error {
+	// Obtain file's contents using a GET request
+	res, err := http.Get(url)
 	if err != nil {
-		return "", err
+		return err
 	}
-	return fmt.Sprintf("%s (%s) Updated: %s", data.Name, data.Version,
-		time.Unix(data.Epoch, 0).Format(time.RFC822Z)), nil
+	defer res.Body.Close()
+	// Create a file to output the file's contents
+	out, err := os.Create(fname)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+	// Copy the data from the request body into the output file
+	_, err = io.Copy(out, res.Body)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-/*
-ExtractZip extracts the contents of a zip file from src to dest. Return an
-error if one occured.
-*/
-func (u *Util) ExtractZip(src, dest string) error {
+func (u *Util) extractZip(src, dest string) error {
 	// Open zip file for reading
 	r, err := zip.OpenReader(src)
 	if err != nil {
@@ -116,36 +152,6 @@ func (u *Util) ExtractZip(src, dest string) error {
 				return err
 			}
 		}
-	}
-	return nil
-}
-
-/*
-Download function finds and downloads the latest version of an addon (specified
-by id) from Curse. Return an error if one occured, otherwise return nil.
-*/
-func (u *Util) Download(id string) error {
-	// Parse id and obtain addon data from curse
-	data, err := u.parse(id)
-	if err != nil {
-		return err
-	}
-	// Obtain the addon file content using a GET request
-	res, err := http.Get(data.URL)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-	// Create a file to save the downloaded addon
-	out, err := os.Create(fmt.Sprintf("%s.zip", id))
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-	// Copy the data from the request body into the output file
-	_, err = io.Copy(out, res.Body)
-	if err != nil {
-		return err
 	}
 	return nil
 }

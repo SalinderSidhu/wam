@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"time"
 
 	"./addon"
 	"./curse"
@@ -36,25 +37,27 @@ func Commands() []cli.Command {
 func (w *CommandWrapper) doGet(c *cli.Context) {
 	for _, arg := range c.Args() {
 		fmt.Printf("[INFO] searching for %s...\n", arg)
-		// Get addon information
-		info, err := w.util.GetInfo(arg)
+		// Get addon data
+		data, err := w.util.GetData(arg)
 		if err != nil {
 			fmt.Printf("[ERROR] %s\n", err.Error())
 			continue
 		}
-		fmt.Printf("[OK] found %s\n", info)
+		// Print addon information to std out
+		fmt.Printf("[OK] found %s (%s) Updated: %s\n", data.Name, data.Version,
+			time.Unix(data.Epoch, 0).Format(time.RFC822Z))
 	}
 }
 
 func (w *CommandWrapper) doInstall(c *cli.Context) {
 	for _, arg := range c.Args() {
-		fmt.Printf("[INFO] searching for %s...\n", arg)
-		// Download the addon
-		err := w.util.Download(arg)
+		fmt.Printf("[INFO] installing %s...\n", arg)
+		// Install addon
+		err := w.util.Install(arg)
 		if err != nil {
 			fmt.Printf("[ERROR] %s\n", err.Error())
 			continue
 		}
-		fmt.Printf("[OK] downloaded %s\n", arg)
+		fmt.Printf("[OK] installed %s\n", arg)
 	}
 }
