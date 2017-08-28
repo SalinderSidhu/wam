@@ -15,22 +15,14 @@ import (
 
 // CommandWrapper wraps dependencies used by CLI commands
 type CommandWrapper struct {
-	util     addon.Util
-	strOK    string
-	strINFO  string
-	strERROR string
+	util addon.Util
 }
 
 // Commands returns an array of CLI commands
 func Commands() []cli.Command {
 	// Create dependencies and Wrapper
 	u := curse.NewUtil()
-	w := CommandWrapper{
-		util:     u,
-		strOK:    color.GreenString("[OK]"),
-		strINFO:  color.BlueString("[INFO]"),
-		strERROR: color.RedString("[ERROR]"),
-	}
+	w := CommandWrapper{util: u}
 	// Return array of CLI commands
 	return []cli.Command{
 		cli.Command{
@@ -52,12 +44,12 @@ func (w *CommandWrapper) doGet(c *cli.Context) {
 	// Create an ASCII table and set table header for addon data
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"name", "version", "updated"})
-	fmt.Fprintf(color.Output, "%s Searching...\n", w.strINFO)
+	w.fprintcInfo("Searching...\n")
 	for _, arg := range c.Args() {
 		// Attempt to get addon data for each curse id
 		data, err := w.util.GetData(arg)
 		if err != nil {
-			//
+			// If an error occured, add id to not found list
 			notFound = append(notFound, color.MagentaString(arg))
 			continue
 		}
@@ -71,27 +63,40 @@ func (w *CommandWrapper) doGet(c *cli.Context) {
 	// Print the addon table data
 	if len(addonTable) > 0 {
 		table.AppendBulk(addonTable)
-		fmt.Fprintf(color.Output, "%s Found...\n", w.strOK)
+		w.fprintcOk("Found...\n")
 		table.Render()
 	}
 	// Print list of addon IDs not found
 	if len(notFound) > 0 {
-		fmt.Fprintf(color.Output, "%s Not Found: %s\n", w.strOK,
-			strings.Join(notFound, ", "))
+		w.fprintcOk("Not Found: %s\n", strings.Join(notFound, ", "))
 	}
 }
 
 func (w *CommandWrapper) doInstall(c *cli.Context) {
 	for _, arg := range c.Args() {
-		fmt.Fprintf(color.Output, "%s Installing %s...\n", w.strINFO,
-			color.MagentaString(arg))
+		w.fprintcInfo("Installing %s...\n", color.MagentaString(arg))
 		// Install addon
 		err := w.util.Install(arg)
 		if err != nil {
-			fmt.Fprintf(color.Output, "%s %s\n", w.strERROR, err.Error())
+			w.fprintcError("%s\n", err.Error())
 			continue
 		}
-		fmt.Fprintf(color.Output, "%s Installed %s\n", w.strOK,
-			color.MagentaString(arg))
+		w.fprintcOk("Installed %s\n", color.MagentaString(arg))
 	}
+}
+
+func (w *CommandWrapper) fprintcOk(f string, a ...interface{}) (int, error) {
+	return w.fprintc("%s %s", color.GreenString("[OK]"), fmt.Sprintf(f, a...))
+}
+
+func (w *CommandWrapper) fprintcInfo(f string, a ...interface{}) (int, error) {
+	return w.fprintc("%s %s", color.BlueString("[INFO]"), fmt.Sprintf(f, a...))
+}
+
+func (w *CommandWrapper) fprintcError(f string, a ...interface{}) (int, error) {
+	return w.fprintc("%s %s", color.RedString("[ERROR]"), fmt.Sprintf(f, a...))
+}
+
+func (w *CommandWrapper) fprintc(f string, a ...interface{}) (int, error) {
+	return fmt.Fprintf(color.Output, f, a...)
 }
