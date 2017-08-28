@@ -19,13 +19,17 @@ Util represents web and file utilities for downloading and managing World of
 Warcraft addons from the Curse website.
 */
 type Util struct {
-	addonURL string
+	addonURL       string
+	defaultPathWin string
+	defaultPathMac string
 }
 
 // NewUtil creates an instance of Utils
 func NewUtil() addon.Util {
 	return &Util{
-		addonURL: "https://mods.curse.com/addons/wow/%s",
+		addonURL:       "https://mods.curse.com/addons/wow/%s",
+		defaultPathWin: "%Program Files (x86)%/World of Warcraft",
+		defaultPathMac: "/Applications/Battle.net/World of Warcraft",
 	}
 }
 
@@ -46,18 +50,25 @@ Install downloads, extracts and installs an addon from Curse using a curse
 addon id. Return an error if one occured.
 */
 func (u *Util) Install(id string) error {
+	// Name of the addon zip file
+	fname := fmt.Sprintf("%s.zip", id)
 	// Parse id and obtain addon data from curse
 	data, err := u.parse(id)
 	if err != nil {
 		return err
 	}
 	// Download the addon using the URL link
-	err = u.downloadURL(data.URL, fmt.Sprintf("%s.zip", id))
+	err = u.downloadURL(data.URL, fname)
 	if err != nil {
 		return err
 	}
-	// Extract the addon zip file
-	err = u.extractZip(fmt.Sprintf("%s.zip", id), "./extracted")
+	// Extract the zip file
+	err = u.extractZip(fname, "./ext")
+	if err != nil {
+		return err
+	}
+	// Delete the downloaded zip file
+	err = os.Remove(fname)
 	if err != nil {
 		return err
 	}

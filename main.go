@@ -10,6 +10,7 @@ import (
 func main() {
 	app := cli.NewApp()
 	app.Name = cmd.Name
+	app.Usage = cmd.Usage
 	app.Email = cmd.Email
 	app.Author = cmd.Author
 	app.Version = cmd.Version
