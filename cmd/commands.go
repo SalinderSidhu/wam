@@ -41,10 +41,13 @@ func Commands() []cli.Command {
 func (w *CommandWrapper) doGet(c *cli.Context) {
 	var notFound []string
 	var addonTable [][]string
-	// Create an ASCII table and set table header for addon data
+	// Create an ASCII table to show addon data
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"name", "version", "updated"})
-	w.fprintcInfo("Searching...\n")
+	if c.NArg() > 0 {
+		// Set ASCII table header for addon data
+		table.SetHeader([]string{"name", "version", "updated"})
+		w.fprintcInfo("Searching...\n")
+	}
 	for _, arg := range c.Args() {
 		// Attempt to get addon data for each curse id
 		data, err := w.util.GetData(arg)

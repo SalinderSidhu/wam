@@ -7,13 +7,19 @@ import (
 	"github.com/urfave/cli"
 )
 
+// Variables to identify the build
+var (
+	Name    string
+	Version string
+)
+
 func main() {
 	app := cli.NewApp()
-	app.Name = cmd.Name
-	app.Usage = cmd.Usage
-	app.Email = cmd.Email
-	app.Author = cmd.Author
-	app.Version = cmd.Version
+	app.Name = Name
+	app.Version = Version
+	app.Author = "Salinder Sidhu"
+	app.Email = "salinder.sid@gmail.com"
+	app.Usage = "Manage World of Warcraft addons"
 	app.Commands = cmd.Commands()
 
 	app.Run(os.Args)

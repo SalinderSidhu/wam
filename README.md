@@ -6,6 +6,7 @@
 ### To do...
 - [ ] Addon id alias database
 - [ ] Backup addon saved variables
+- [ ] Support for multiple addon profiles
 - [ ] Search for addons using keywords and/or filters
 
 # Table of Contents

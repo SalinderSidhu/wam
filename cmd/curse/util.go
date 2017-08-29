@@ -19,17 +19,13 @@ Util represents web and file utilities for downloading and managing World of
 Warcraft addons from the Curse website.
 */
 type Util struct {
-	addonURL       string
-	defaultPathWin string
-	defaultPathMac string
+	addonURL string
 }
 
 // NewUtil creates an instance of Utils
 func NewUtil() addon.Util {
 	return &Util{
-		addonURL:       "https://mods.curse.com/addons/wow/%s",
-		defaultPathWin: "%Program Files (x86)%/World of Warcraft",
-		defaultPathMac: "/Applications/Battle.net/World of Warcraft",
+		addonURL: "https://mods.curse.com/addons/wow/%s",
 	}
 }
 
