@@ -12,6 +12,7 @@ import (
 
 	"../addon"
 	"github.com/PuerkitoBio/goquery"
+	"github.com/kardianos/osext"
 )
 
 /*
@@ -30,10 +31,10 @@ func NewUtil() addon.Util {
 }
 
 /*
-GetData returns an addon data object parsed from Curse using a curse addon id.
+GetData returns an addon data object parsed from Curse using a Curse addon id.
 */
 func (u *Util) GetData(id string) (*addon.Data, error) {
-	// Parse id an obtain addon data from curse
+	// Parse id an obtain addon data from Curse
 	data, err := u.parse(id)
 	if err != nil {
 		return nil, err
@@ -42,29 +43,34 @@ func (u *Util) GetData(id string) (*addon.Data, error) {
 }
 
 /*
-Install downloads, extracts and installs an addon from Curse using a curse
+Install downloads, extracts and installs an addon from Curse using a Curse
 addon id. Return an error if one occured.
 */
 func (u *Util) Install(id string) error {
-	// Name of the addon zip file
-	fname := fmt.Sprintf("%s.zip", id)
-	// Parse id and obtain addon data from curse
+	// Obtain the executable directory
+	dir, err := osext.ExecutableFolder()
+	if err != nil {
+		return err
+	}
+	// Name and full path of the addon zip file based on the id
+	fpath := fmt.Sprintf("%s/%s.zip", dir, id)
+	// Parse id and obtain addon data from Curse
 	data, err := u.parse(id)
 	if err != nil {
 		return err
 	}
-	// Download the addon using the URL link
-	err = u.downloadURL(data.URL, fname)
+	// Download the addon zip file using the URL link
+	err = u.downloadZip(data.URL, fpath)
 	if err != nil {
 		return err
 	}
-	// Extract the zip file
-	err = u.extractZip(fname, "./ext")
+	// Extract the zip file to a tmp folder
+	err = u.extractZip(fpath, fmt.Sprintf("%s/tmp", dir))
 	if err != nil {
 		return err
 	}
-	// Delete the downloaded zip file
-	err = os.Remove(fname)
+	// Delete the downloaded zip file from the tmp folder
+	err = os.Remove(fpath)
 	if err != nil {
 		return err
 	}
@@ -99,20 +105,20 @@ func (u *Util) parse(id string) (*addon.Data, error) {
 	return &addon.Data{Name: n, Epoch: e, Version: v, URL: l}, nil
 }
 
-func (u *Util) downloadURL(url, fname string) error {
-	// Obtain file's contents using a GET request
-	res, err := http.Get(url)
+func (u *Util) downloadZip(src, dest string) error {
+	// Obtain file's contents from src using a GET request
+	res, err := http.Get(src)
 	if err != nil {
 		return err
 	}
 	defer res.Body.Close()
-	// Create a file to output the file's contents
-	out, err := os.Create(fname)
+	// Create a zip file to output the file's contents
+	out, err := os.Create(dest)
 	if err != nil {
 		return err
 	}
 	defer out.Close()
-	// Copy the data from the request body into the output file
+	// Copy the data from the result body into the output file
 	_, err = io.Copy(out, res.Body)
 	if err != nil {
 		return err

@@ -1,19 +1,11 @@
 # WAM
 > A World of Warcraft Addon Manager CLI tool built using Go.
 
-# Features
-
-### To do...
-- [ ] Addon id alias database
-- [ ] Backup addon saved variables
-- [ ] Support for multiple addon profiles
-- [ ] Search for addons using keywords and/or filters
-
 # Table of Contents
 
 * [Getting Started](#getting-started)
     * [Requirements](#requirements)
-    * [Configuration](#configuration)
+    * [Building](#Building)
 * [Usage](#usage)
 * [Credits](#credits)
 * [License](#license)
@@ -30,10 +22,13 @@ Package | Command
 :--: | --
 cli | `go get github.com/urfave/cli`
 color | `go get github.com/fatih/color`
+osext | `go get github.com/kardianos/osext`
 goquery | `go get github.com/PuerkitoBio/goquery`
 tablewriter | `go get github.com/olekukonko/tablewriter`
 
-## Configuration
+## Building
+
+Install the above Go packages and then type `make` to compile the binary.
 
 # Usage
 

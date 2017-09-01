@@ -1,25 +1,21 @@
 # Name of the binary output
 BINARY=wam
 
-# VERSON value to pass into the binary 
-VERSION=0.0.5
+# VERSION value to pass into the binary 
+VERSION=0.0.6
 
 # Setup the -ldflags option for go build, interpolate the variable values
-LDFLAGS=-ldflags "-X main.Name=${BINARY} -X main.Version=${VERSION}"
+LDFLAGS=-ldflags "-X main.Name=$(BINARY) -X main.Version=$(VERSION)"
 
 # Default target
-.DEFAULT_GOAL" ${BINARY}
+.DEFAULT_GOAL: build
 
 # Builds the project
-${BINARY}:
-	go build ${LDFLAGS} -o {$BINARY}
-
-# Installs the project: copies binaries
-install:
-	go install ${LDFLAGS} -o {$BINARY}
+build:
+	go build $(LDFLAGS) -o bin/$(BINARY)
 
 # Cleans the project: deletes binaries
 clean:
-	if [ -f ${BINARY} ] ; then rm ${BINARY} ; fi
+	rm -rf bin/$(BINARY)
 
 .PHONY: clean install
