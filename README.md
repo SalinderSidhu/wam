@@ -34,7 +34,7 @@ Install the above Go packages and then type `make` to compile the binary.
 
 # Credits
 
-Inspired by [wow-am](https://www.npmjs.com/package/wow-am)
+CLI design inspired from [wow-am](https://www.npmjs.com/package/wow-am)
 
 # License
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](/LICENSE.md)

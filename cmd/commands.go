@@ -26,6 +26,11 @@ func Commands() []cli.Command {
 	// Return array of CLI commands
 	return []cli.Command{
 		cli.Command{
+			Name:   "init",
+			Usage:  "Initialize a new addon profile",
+			Action: w.doInit,
+		},
+		cli.Command{
 			Name:   "get",
 			Usage:  "Display information about an addon",
 			Action: w.doGet,
@@ -36,6 +41,16 @@ func Commands() []cli.Command {
 			Action: w.doInstall,
 		},
 	}
+}
+
+func (w *CommandWrapper) doInit(c *cli.Context) {
+	w.fprintcInfo("Creating addon profile...\n")
+	// Obtain path from argument (if any) and create addon profile
+	if err := w.utils.Init(c.Args().First()); err != nil {
+		w.fprintcError("%s\n", err.Error())
+		return
+	}
+	w.fprintcOk("Profile created in %s\n", color.YellowString("wam.json"))
 }
 
 func (w *CommandWrapper) doGet(c *cli.Context) {
@@ -79,8 +94,7 @@ func (w *CommandWrapper) doInstall(c *cli.Context) {
 	for _, arg := range c.Args() {
 		w.fprintcInfo("Installing %s...\n", color.MagentaString(arg))
 		// Install addon
-		err := w.utils.Install(arg)
-		if err != nil {
+		if err := w.utils.Install(arg); err != nil {
 			w.fprintcError("%s\n", err.Error())
 			continue
 		}

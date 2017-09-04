@@ -2,11 +2,13 @@ package curse
 
 import (
 	"archive/zip"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 
@@ -26,10 +28,47 @@ func NewUtils() addon.Utils {
 	return &Utils{
 		addonURL: "https://mods.curse.com/addons/wow/%s",
 		defaultPaths: map[string]string{
-			"windows": "%Program Files (x86)%/World of Warcraft",
+			"windows": "%programfiles(x86)%/World of Warcraft",
 			"darwin":  "/Applications/Battle.net/World of Warcraft",
 		},
 	}
+}
+
+/*
+Init creates a new addon profile file (wam.json) with the World of Warcraft
+installation path p. The default path for the current OS is selected if p is not
+provided. Return an error if one occured.
+*/
+func (u *Utils) Init(p string) error {
+	// Obtain the executable directory
+	dir, err := osext.ExecutableFolder()
+	if err != nil {
+		return err
+	}
+	// Name and full path of the wam.json file
+	fpath := fmt.Sprintf("%s/wam.json", dir)
+	// Check if file does not exist
+	if _, err := os.Stat(fpath); !os.IsNotExist(err) {
+		// Return specific error to prevent overwriting existing file
+		return fmt.Errorf("existing addon profile found in wam.json")
+	}
+	// Create a new file to store the contents of the wam file
+	out, err := os.Create(fpath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+	// Create a wam file and assign wow installation path
+	wfile := addon.WamFile{}
+	if wfile.Path = p; wfile.Path == "" {
+		wfile.Path = u.defaultPaths[runtime.GOOS]
+	}
+	// Output Wam file data to the wam.json file
+	e := json.NewEncoder(out)
+	if err := e.Encode(wfile); err != nil {
+		return err
+	}
+	return nil
 }
 
 /*
@@ -37,7 +76,7 @@ GetData returns an addon data object parsed from Curse using a Curse addon id.
 */
 func (u *Utils) GetData(id string) (*addon.Data, error) {
 	// Parse id an obtain addon data from Curse
-	data, err := u.parse(id)
+	data, err := u.parseCurse(id)
 	if err != nil {
 		return nil, err
 	}
@@ -49,6 +88,10 @@ Install downloads, extracts and installs an addon from Curse using a Curse
 addon id. Return an error if one occured.
 */
 func (u *Utils) Install(id string) error {
+	// Obtain the addon profile to store data of newly installed addons
+	if _, err := u.parseWamFile(); err != nil {
+		return err
+	}
 	// Obtain the executable directory
 	dir, err := osext.ExecutableFolder()
 	if err != nil {
@@ -57,29 +100,26 @@ func (u *Utils) Install(id string) error {
 	// Name and full path of the addon zip file based on the id
 	fpath := fmt.Sprintf("%s/%s.zip", dir, id)
 	// Parse id and obtain addon data from Curse
-	data, err := u.parse(id)
+	data, err := u.parseCurse(id)
 	if err != nil {
 		return err
 	}
 	// Download the addon zip file using the URL link
-	err = u.downloadZip(data.URL, fpath)
-	if err != nil {
+	if err = u.downloadZip(data.URL, fpath); err != nil {
 		return err
 	}
 	// Extract the zip file to a tmp folder
-	err = u.extractZip(fpath, fmt.Sprintf("%s/tmp", dir))
-	if err != nil {
+	if err = u.extractZip(fpath, fmt.Sprintf("%s/tmp", dir)); err != nil {
 		return err
 	}
 	// Delete the downloaded zip file from the tmp folder
-	err = os.Remove(fpath)
-	if err != nil {
+	if err = os.Remove(fpath); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (u *Utils) parse(id string) (*addon.Data, error) {
+func (u *Utils) parseCurse(id string) (*addon.Data, error) {
 	// Resolve the addon page from Curse
 	doc, err := goquery.NewDocument(fmt.Sprintf(u.addonURL, id))
 	if err != nil {
@@ -107,6 +147,33 @@ func (u *Utils) parse(id string) (*addon.Data, error) {
 	return &addon.Data{Name: n, DateEpoch: e, Version: v, URL: l}, nil
 }
 
+func (u *Utils) parseWamFile() (*addon.WamFile, error) {
+	// Obtain the executable directory
+	dir, err := osext.ExecutableFolder()
+	if err != nil {
+		return nil, err
+	}
+	// Name and full path of the wam.json file
+	fpath := fmt.Sprintf("%s/wam.json", dir)
+	// Check if wam.json exists
+	if _, err := os.Stat(fpath); os.IsNotExist(err) {
+		return nil, fmt.Errorf(
+			"addon profile required, please create using \"wam init\"")
+	}
+	// Open the wam.json
+	f, err := os.Open(fpath)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	// Create wam file object with json data from wam.json
+	wfile := addon.WamFile{}
+	if err = json.NewDecoder(f).Decode(&wfile); err != nil {
+		return nil, err
+	}
+	return &wfile, nil
+}
+
 func (u *Utils) downloadZip(src, dest string) error {
 	// Obtain file's contents from src using a GET request
 	res, err := http.Get(src)
@@ -121,8 +188,7 @@ func (u *Utils) downloadZip(src, dest string) error {
 	}
 	defer out.Close()
 	// Copy the data from the result body into the output file
-	_, err = io.Copy(out, res.Body)
-	if err != nil {
+	if _, err = io.Copy(out, res.Body); err != nil {
 		return err
 	}
 	return nil
@@ -162,8 +228,7 @@ func (u *Utils) extractZip(src, dest string) error {
 				return err
 			}
 			defer f.Close()
-			_, err = io.Copy(f, rc)
-			if err != nil {
+			if _, err = io.Copy(f, rc); err != nil {
 				return err
 			}
 		}

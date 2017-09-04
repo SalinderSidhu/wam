@@ -2,7 +2,7 @@
 BINARY=wam
 
 # VERSION value to pass into the binary 
-VERSION=0.0.7
+VERSION=0.0.8
 
 # Setup the -ldflags option for go build, interpolate the variable values
 LDFLAGS=-ldflags "-X main.Name=$(BINARY) -X main.Version=$(VERSION)"
