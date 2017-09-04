@@ -15,14 +15,14 @@ import (
 
 // CommandWrapper wraps dependencies used by CLI commands
 type CommandWrapper struct {
-	util addon.Util
+	utils addon.Utils
 }
 
 // Commands returns an array of CLI commands
 func Commands() []cli.Command {
 	// Create dependencies and Wrapper
-	u := curse.NewUtil()
-	w := CommandWrapper{util: u}
+	u := curse.NewUtils()
+	w := CommandWrapper{utils: u}
 	// Return array of CLI commands
 	return []cli.Command{
 		cli.Command{
@@ -50,7 +50,7 @@ func (w *CommandWrapper) doGet(c *cli.Context) {
 	}
 	for _, arg := range c.Args() {
 		// Attempt to get addon data for each curse id
-		data, err := w.util.GetData(arg)
+		data, err := w.utils.GetData(arg)
 		if err != nil {
 			// If an error occured, add id to not found list
 			notFound = append(notFound, color.MagentaString(arg))
@@ -60,7 +60,7 @@ func (w *CommandWrapper) doGet(c *cli.Context) {
 		addonTable = append(addonTable, []string{
 			data.Name,
 			data.Version,
-			time.Unix(data.Epoch, 0).Format("Jan 02, 2006"),
+			time.Unix(data.DateEpoch, 0).Format("Jan 02, 2006"),
 		})
 	}
 	// Print the addon table data
@@ -79,7 +79,7 @@ func (w *CommandWrapper) doInstall(c *cli.Context) {
 	for _, arg := range c.Args() {
 		w.fprintcInfo("Installing %s...\n", color.MagentaString(arg))
 		// Install addon
-		err := w.util.Install(arg)
+		err := w.utils.Install(arg)
 		if err != nil {
 			w.fprintcError("%s\n", err.Error())
 			continue

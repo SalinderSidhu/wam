@@ -15,25 +15,27 @@ import (
 	"github.com/kardianos/osext"
 )
 
-/*
-Util represents web and file utilities for downloading and managing World of
-Warcraft addons from the Curse website.
-*/
-type Util struct {
-	addonURL string
+// Utils implements the corresponding interface from addon.Utils
+type Utils struct {
+	addonURL     string
+	defaultPaths map[string]string
 }
 
-// NewUtil creates an instance of Utils
-func NewUtil() addon.Util {
-	return &Util{
+// NewUtils creates an instance of Utils
+func NewUtils() addon.Utils {
+	return &Utils{
 		addonURL: "https://mods.curse.com/addons/wow/%s",
+		defaultPaths: map[string]string{
+			"windows": "%Program Files (x86)%/World of Warcraft",
+			"darwin":  "/Applications/Battle.net/World of Warcraft",
+		},
 	}
 }
 
 /*
 GetData returns an addon data object parsed from Curse using a Curse addon id.
 */
-func (u *Util) GetData(id string) (*addon.Data, error) {
+func (u *Utils) GetData(id string) (*addon.Data, error) {
 	// Parse id an obtain addon data from Curse
 	data, err := u.parse(id)
 	if err != nil {
@@ -46,7 +48,7 @@ func (u *Util) GetData(id string) (*addon.Data, error) {
 Install downloads, extracts and installs an addon from Curse using a Curse
 addon id. Return an error if one occured.
 */
-func (u *Util) Install(id string) error {
+func (u *Utils) Install(id string) error {
 	// Obtain the executable directory
 	dir, err := osext.ExecutableFolder()
 	if err != nil {
@@ -77,7 +79,7 @@ func (u *Util) Install(id string) error {
 	return nil
 }
 
-func (u *Util) parse(id string) (*addon.Data, error) {
+func (u *Utils) parse(id string) (*addon.Data, error) {
 	// Resolve the addon page from Curse
 	doc, err := goquery.NewDocument(fmt.Sprintf(u.addonURL, id))
 	if err != nil {
@@ -102,10 +104,10 @@ func (u *Util) parse(id string) (*addon.Data, error) {
 		return nil, err
 	}
 	l, _ := dDoc.Find("#file-download a").Attr("data-href")
-	return &addon.Data{Name: n, Epoch: e, Version: v, URL: l}, nil
+	return &addon.Data{Name: n, DateEpoch: e, Version: v, URL: l}, nil
 }
 
-func (u *Util) downloadZip(src, dest string) error {
+func (u *Utils) downloadZip(src, dest string) error {
 	// Obtain file's contents from src using a GET request
 	res, err := http.Get(src)
 	if err != nil {
@@ -126,7 +128,7 @@ func (u *Util) downloadZip(src, dest string) error {
 	return nil
 }
 
-func (u *Util) extractZip(src, dest string) error {
+func (u *Utils) extractZip(src, dest string) error {
 	// Open zip file for reading
 	r, err := zip.OpenReader(src)
 	if err != nil {
