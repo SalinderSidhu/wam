@@ -10,6 +10,7 @@ import (
 // Variables to identify the build
 var (
 	Name    string
+	Hash    string
 	Version string
 )
 
