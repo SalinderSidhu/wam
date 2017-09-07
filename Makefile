@@ -7,23 +7,23 @@ VERSION=0.0.8
 HASH=$(shell git rev-parse HEAD)
 LDFLAGS=-ldflags="-X main.Name=$(BINARY) -X main.Version=$(VERSION) -X main.Hash=$(HASH)"
 
-# Build the entire project
-all: clean linux darwin windows
+# Build all binaries
+all: clean linux mac win
 
-# Builds the project
+# Builds the project for Linux based systems
 linux:
-	GOOS=linux GOARCH=$(GOARCH) go build $(LDFLAGS) -o bin/$(BINARY)
+	GOOS=linux GOARCH=$(GOARCH) go build $(LDFLAGS) -o bin/$(BINARY)-linux-$(GOARCH)
 
-# Builds the project
-darwin:
-	GOOS=darwin GOARCH=$(GOARCH) go build $(LDFLAGS) -o bin/$(BINARY)
+# Builds the project for Darwin based MAC OS X systems
+mac:
+	GOOS=darwin GOARCH=$(GOARCH) go build $(LDFLAGS) -o bin/$(BINARY)-darwin-$(GOARCH)
 
-# Builds the project
-windows:
-	GOOS=windows GOARCH=$(GOARCH) go build $(LDFLAGS) -o bin/$(BINARY).exe
+# Builds the project for Windows based systems
+win:
+	GOOS=windows GOARCH=$(GOARCH) go build $(LDFLAGS) -o bin/$(BINARY)-windows-$(GOARCH).exe
 
 # Cleans the project: deletes binaries
 clean:
 	rm -rf ./bin
 
-.PHONY: linux darwin windows clean
+.PHONY: linux mac win clean

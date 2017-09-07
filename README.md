@@ -6,7 +6,6 @@
 * [Getting Started](#getting-started)
     * [Requirements](#requirements)
     * [Building](#Building)
-* [Usage](#usage)
 * [Credits](#credits)
 * [License](#license)
 
@@ -19,7 +18,7 @@
 This application requires the following go packages:
 
 Package | Command
-:--: | --
+-- | --
 cli | `go get github.com/urfave/cli`
 color | `go get github.com/fatih/color`
 osext | `go get github.com/kardianos/osext`
@@ -28,9 +27,13 @@ tablewriter | `go get github.com/olekukonko/tablewriter`
 
 ## Building
 
-Install the above Go packages and then type `make` to compile the binary.
+Install the above Go packages and type `make` to compile the binaries.
 
-# Usage
+### Windows
+
+If you're using Windows first download and install [Git for Windows](https://git-for-windows.github.io/). Next, visit [this Gist](https://gist.github.com/evanwill/0207876c3243bbb6863e65ec5dc3f058) to install the **make** tool for Git Bash. Finally, open Git Bash and type `make win`.
+
+*Note: The Makefile uses standard Go commands. For more info, please visit the [Offical Documentation](https://golang.org/cmd/go/#hdr-Compile_packages_and_dependencies) on `go build`.*
 
 # Credits
 
