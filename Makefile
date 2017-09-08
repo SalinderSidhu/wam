@@ -1,29 +1,38 @@
 # Configurable variables
 BINARY=wam
+FOLDER=bin
 GOARCH=amd64
 VERSION=0.0.8
 
-# Setup required HASH for the binary and LDFLAGS for the compiler
+# Required HASH for the binary and LDFLAGS for the compiler
 HASH=$(shell git rev-parse HEAD)
-LDFLAGS=-ldflags="-X main.Name=$(BINARY) -X main.Version=$(VERSION) -X main.Hash=$(HASH)"
+LDFLAGS="-X main.Name=$(BINARY) -X main.Version=$(VERSION) -X main.Hash=$(HASH)"
 
-# Build all binaries
-all: clean linux mac win
+# Function definition for compiling and building Golang projects
+define build
+	GOOS=$(1) GOARCH=$(2) go build -ldflags=$(LDFLAGS) -o $(FOLDER)/$(BINARY)$(3)
+endef
 
-# Builds the project for Linux based systems
+# Build all binaries for each OS
+all: clean 
+	$(call build,linux,$(GOARCH),-linux-$(GOARCH))
+	$(call build,darwin,$(GOARCH),-darwin-$(GOARCH))
+	$(call build,windows,$(GOARCH),-windows-$(GOARCH).exe)
+
+# Builds the project for Linux systems
 linux:
-	GOOS=linux GOARCH=$(GOARCH) go build $(LDFLAGS) -o bin/$(BINARY)-linux-$(GOARCH)
+	$(call build,linux,$(GOARCH))
 
-# Builds the project for Darwin based MAC OS X systems
-mac:
-	GOOS=darwin GOARCH=$(GOARCH) go build $(LDFLAGS) -o bin/$(BINARY)-darwin-$(GOARCH)
+# Builds the project for Darwin systems
+darwin:
+	$(call build,darwin,$(GOARCH))
 
-# Builds the project for Windows based systems
-win:
-	GOOS=windows GOARCH=$(GOARCH) go build $(LDFLAGS) -o bin/$(BINARY)-windows-$(GOARCH).exe
+# Builds the project for Windows systems
+windows:
+	$(call build,windows,$(GOARCH),.exe)
 
-# Cleans the project: deletes binaries
+# Cleans the project
 clean:
-	rm -rf ./bin
+	rm -rf ./$(FOLDER)
 
-.PHONY: linux mac win clean
+.PHONY: linux darwin windows clean

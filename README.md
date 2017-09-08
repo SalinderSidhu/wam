@@ -27,11 +27,11 @@ tablewriter | `go get github.com/olekukonko/tablewriter`
 
 ## Building
 
-Install the above Go packages and type `make` to compile the binaries.
+Install the above Go packages and type `make` to compile the binaries. To build platform specific binaries type `make linux` for linux and `make darwin` for Mac OS X.
 
 ### Windows
 
-If you're using Windows first download and install [Git for Windows](https://git-for-windows.github.io/). Next, visit [this Gist](https://gist.github.com/evanwill/0207876c3243bbb6863e65ec5dc3f058) to install the **make** tool for Git Bash. Finally, open Git Bash and type `make win`.
+If you're using Windows first download and install [Git for Windows](https://git-for-windows.github.io/). Next, visit [this Gist](https://gist.github.com/evanwill/0207876c3243bbb6863e65ec5dc3f058) to install the **make** tool for Git Bash. Finally, open Git Bash and type `make windows`.
 
 *Note: The Makefile uses standard Go commands. For more info, please visit the [Offical Documentation](https://golang.org/cmd/go/#hdr-Compile_packages_and_dependencies) on `go build`.*
 
