@@ -21,7 +21,6 @@ Package | Command
 -- | --
 cli | `go get github.com/urfave/cli`
 color | `go get github.com/fatih/color`
-osext | `go get github.com/kardianos/osext`
 goquery | `go get github.com/PuerkitoBio/goquery`
 tablewriter | `go get github.com/olekukonko/tablewriter`
 

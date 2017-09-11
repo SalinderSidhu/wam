@@ -14,7 +14,6 @@ import (
 
 	"../addon"
 	"github.com/PuerkitoBio/goquery"
-	"github.com/kardianos/osext"
 )
 
 // Utils implements the corresponding interface from addon.Utils
@@ -28,8 +27,8 @@ func NewUtils() addon.Utils {
 	return &Utils{
 		addonURL: "https://mods.curse.com/addons/wow/%s",
 		defaultPaths: map[string]string{
-			"windows": "%programfiles(x86)%/World of Warcraft",
-			"darwin":  "/Applications/Battle.net/World of Warcraft",
+			"windows": "C:/Program Files (x86)/World of Warcraft/Interface/AddOns",
+			"darwin":  "/Applications/Battle.net/World of Warcraft/Interface/AddOns",
 		},
 	}
 }
@@ -41,7 +40,7 @@ provided. Return an error if one occured.
 */
 func (u *Utils) Init(p string) error {
 	// Obtain the executable directory
-	dir, err := osext.ExecutableFolder()
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		return err
 	}
@@ -89,11 +88,12 @@ addon id. Return an error if one occured.
 */
 func (u *Utils) Install(id string) error {
 	// Obtain the addon profile to store data of newly installed addons
-	if _, err := u.parseWamFile(); err != nil {
+	wFile, err := u.parseWamFile()
+	if err != nil {
 		return err
 	}
 	// Obtain the executable directory
-	dir, err := osext.ExecutableFolder()
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		return err
 	}
@@ -109,7 +109,7 @@ func (u *Utils) Install(id string) error {
 		return err
 	}
 	// Extract the zip file to a tmp folder
-	if err = u.extractZip(fpath, fmt.Sprintf("%s/tmp", dir)); err != nil {
+	if err = u.extractZip(fpath, wFile.Path); err != nil {
 		return err
 	}
 	// Delete the downloaded zip file from the tmp folder
@@ -149,7 +149,7 @@ func (u *Utils) parseCurse(id string) (*addon.Data, error) {
 
 func (u *Utils) parseWamFile() (*addon.WamFile, error) {
 	// Obtain the executable directory
-	dir, err := osext.ExecutableFolder()
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		return nil, err
 	}
