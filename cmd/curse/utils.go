@@ -2,7 +2,6 @@ package curse
 
 import (
 	"archive/zip"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -51,20 +50,13 @@ func (u *Utils) Init(p string) error {
 		// Return specific error to prevent overwriting existing file
 		return fmt.Errorf("existing addon profile found in wam.json")
 	}
-	// Create a new file to store the contents of the wam file
-	out, err := os.Create(fpath)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
 	// Create a wam file and assign wow installation path
-	wfile := addon.WamFile{}
-	if wfile.Path = p; wfile.Path == "" {
-		wfile.Path = u.defaultPaths[runtime.GOOS]
+	wFile := addon.Profile{}
+	if wFile.Path = p; wFile.Path == "" {
+		wFile.Path = u.defaultPaths[runtime.GOOS]
 	}
 	// Output Wam file data to the wam.json file
-	e := json.NewEncoder(out)
-	if err := e.Encode(wfile); err != nil {
+	if err := wFile.Write(fpath); err != nil {
 		return err
 	}
 	return nil
@@ -87,14 +79,14 @@ Install downloads, extracts and installs an addon from Curse using a Curse
 addon id. Return an error if one occured.
 */
 func (u *Utils) Install(id string) error {
-	// Obtain the addon profile to store data of newly installed addons
-	wFile, err := u.parseWamFile()
-	if err != nil {
-		return err
-	}
 	// Obtain the executable directory
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
+		return err
+	}
+	// Obtain the addon profile to store data of newly installed addons
+	wFile := addon.Profile{}
+	if err := wFile.Read(fmt.Sprintf("%s/wam.json", dir)); err != nil {
 		return err
 	}
 	// Name and full path of the addon zip file based on the id
@@ -145,33 +137,6 @@ func (u *Utils) parseCurse(id string) (*addon.Data, error) {
 	}
 	l, _ := dDoc.Find("#file-download a").Attr("data-href")
 	return &addon.Data{Name: n, DateEpoch: e, Version: v, URL: l}, nil
-}
-
-func (u *Utils) parseWamFile() (*addon.WamFile, error) {
-	// Obtain the executable directory
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	if err != nil {
-		return nil, err
-	}
-	// Name and full path of the wam.json file
-	fpath := fmt.Sprintf("%s/wam.json", dir)
-	// Check if wam.json exists
-	if _, err := os.Stat(fpath); os.IsNotExist(err) {
-		return nil, fmt.Errorf(
-			"addon profile required, please create using \"wam init\"")
-	}
-	// Open the wam.json
-	f, err := os.Open(fpath)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	// Create wam file object with json data from wam.json
-	wfile := addon.WamFile{}
-	if err = json.NewDecoder(f).Decode(&wfile); err != nil {
-		return nil, err
-	}
-	return &wfile, nil
 }
 
 func (u *Utils) downloadZip(src, dest string) error {
