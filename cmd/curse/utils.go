@@ -24,7 +24,7 @@ type Utils struct {
 // NewUtils creates an instance of Utils
 func NewUtils() addon.Utils {
 	return &Utils{
-		addonURL: "https://mods.curse.com/addons/wow/%s",
+		addonURL: "https://www.curseforge.com/wow/addons/%s",
 		defaultPaths: map[string]string{
 			"windows": "C:/Program Files (x86)/World of Warcraft/Interface/AddOns",
 			"darwin":  "/Applications/Battle.net/World of Warcraft/Interface/AddOns",
@@ -118,14 +118,14 @@ func (u *Utils) parseCurse(id string) (*addon.Data, error) {
 		return nil, err
 	}
 	// Check for 404 page if the Curse addon was not found
-	h := doc.Find("#content section header h2").First().Text()
+	h := doc.Find("h2").First().Text()
 	if h == "Not found" {
 		return nil, fmt.Errorf("%s not found on Curse", id)
 	}
 	// Parse specific information from the page
-	n := doc.Find("#project-overview > header > h2").First().Text()
-	v := strings.Split(doc.Find("li.newest-file").First().Text(), ": ")[1]
-	d, _ := doc.Find("li.updated abbr").Attr("data-epoch")
+	n := doc.Find("#content section header h2").First().Text()
+	v := strings.Split(doc.Find(".stats--game-version").First().Text(), ": ")[1]
+	d, _ := doc.Find(".stats--last-updated abbr").Attr("data-epoch")
 	e, err := strconv.ParseInt(d, 10, 64)
 	if err != nil {
 		return nil, err
@@ -135,7 +135,8 @@ func (u *Utils) parseCurse(id string) (*addon.Data, error) {
 	if err != nil {
 		return nil, err
 	}
-	l, _ := dDoc.Find("#file-download a").Attr("data-href")
+	dlPart, _ := dDoc.Find("a.download__link").Attr("href")
+	l := fmt.Sprintf(u.addonURL, strings.Split(dlPart, "/wow/addons/")[1])
 	return &addon.Data{Name: n, DateEpoch: e, Version: v, URL: l}, nil
 }
 
