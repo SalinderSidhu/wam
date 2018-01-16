@@ -56,10 +56,7 @@ func (u *Utils) Init(p string) error {
 		wFile.Path = u.defaultPaths[runtime.GOOS]
 	}
 	// Output Wam file data to the wam.json file
-	if err := wFile.Write(fpath); err != nil {
-		return err
-	}
-	return nil
+	return wFile.Write(fpath)
 }
 
 /*
@@ -105,10 +102,7 @@ func (u *Utils) Install(id string) error {
 		return err
 	}
 	// Delete the downloaded zip file from the tmp folder
-	if err = os.Remove(fpath); err != nil {
-		return err
-	}
-	return nil
+	return os.Remove(fpath)
 }
 
 func (u *Utils) parseCurse(id string) (*addon.Data, error) {
