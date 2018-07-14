@@ -3,21 +3,14 @@ package main
 import (
 	"os"
 
-	"./cmd"
+	"github.com/salindersidhu/wam/cmd"
 	"github.com/urfave/cli"
-)
-
-// Variables to identify the build
-var (
-	Name    string
-	Hash    string
-	Version string
 )
 
 func main() {
 	app := cli.NewApp()
-	app.Name = Name
-	app.Version = Version
+	app.Name = "wam"
+	app.Version = "0.0.9"
 	app.Author = "Salinder Sidhu"
 	app.Email = "salinder.sid@gmail.com"
 	app.Usage = "Manage World of Warcraft addons"

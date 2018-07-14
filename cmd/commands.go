@@ -6,10 +6,10 @@ import (
 	"strings"
 	"time"
 
-	"./addon"
-	"./curse"
 	"github.com/fatih/color"
 	"github.com/olekukonko/tablewriter"
+	"github.com/salindersidhu/wam/cmd/addon"
+	"github.com/salindersidhu/wam/cmd/curse"
 	"github.com/urfave/cli"
 )
 

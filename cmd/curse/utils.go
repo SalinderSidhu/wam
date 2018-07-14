@@ -11,8 +11,8 @@ import (
 	"strconv"
 	"strings"
 
-	"../addon"
 	"github.com/PuerkitoBio/goquery"
+	"github.com/salindersidhu/wam/cmd/addon"
 )
 
 // Utils implements the corresponding interface from addon.Utils
