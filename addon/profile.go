@@ -17,7 +17,7 @@ type Profile struct {
 }
 
 // Read JSON data from file and load into Profile object.
-// Return an error if one occured.
+// Return an error if one occurred.
 func (p *Profile) Read(f string) error {
 	// Open file containing profile data
 	in, err := os.Open(f)

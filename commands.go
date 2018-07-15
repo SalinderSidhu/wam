@@ -13,12 +13,13 @@ import (
 	"github.com/urfave/cli"
 )
 
-// CommandWrapper wraps dependencies used by CLI commands
+// A CommandWrapper represents a wrapper that packages the dependencies used
+// by CLI commands.
 type CommandWrapper struct {
 	parser addon.Parser
 }
 
-// Commands returns an array of CLI commands
+// Commands returns an array of CLI commands.
 func Commands() []cli.Command {
 	// Create dependencies and Wrapper
 	p := curse.NewParser()
@@ -57,7 +58,7 @@ func (w *CommandWrapper) doGet(c *cli.Context) {
 		// Attempt to get addon data for each curse id
 		data, err := w.parser.GetData(arg)
 		if err != nil {
-			// If an error occured, add id to not found list
+			// If an error occurred, add id to not found list
 			notFound = append(notFound, color.MagentaString(arg))
 			continue
 		}
