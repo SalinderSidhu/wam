@@ -12,18 +12,18 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/salindersidhu/wam/cmd/addon"
+	"github.com/salindersidhu/wam/addon"
 )
 
-// Utils implements the corresponding interface from addon.Utils
-type Utils struct {
+// A Parser implements the corresponding interface from addon.Parser.
+type Parser struct {
 	addonURL     string
 	defaultPaths map[string]string
 }
 
-// NewUtils creates an instance of Utils
-func NewUtils() addon.Utils {
-	return &Utils{
+// NewParser creates an instance of Parser.
+func NewParser() addon.Parser {
+	return &Parser{
 		addonURL: "https://www.curseforge.com/wow/addons/%s",
 		defaultPaths: map[string]string{
 			"windows": "C:/Program Files (x86)/World of Warcraft/Interface/AddOns",
@@ -32,12 +32,22 @@ func NewUtils() addon.Utils {
 	}
 }
 
-/*
-Init creates a new addon profile file (wam.json) with the World of Warcraft
-installation path p. The default path for the current OS is selected if p is not
-provided. Return an error if one occured.
-*/
-func (u *Utils) Init(p string) error {
+// GetData returns an addon data object parsed from Curse using a Curse addon
+// id.
+func (p *Parser) GetData(id string) (*addon.Data, error) {
+	// Parse id an obtain addon data from Curse
+	data, err := p.parseCurse(id)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+// Init creates a new addon profile file (wam.json) with the World of Warcraft
+// installation path f. The default path for the current OS is selected if f
+// is not provided.
+// Return an error if one occurred.
+func (p *Parser) Init(f string) error {
 	// Obtain the executable directory
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
@@ -52,30 +62,17 @@ func (u *Utils) Init(p string) error {
 	}
 	// Create a wam file and assign wow installation path
 	wFile := addon.Profile{}
-	if wFile.Path = p; wFile.Path == "" {
-		wFile.Path = u.defaultPaths[runtime.GOOS]
+	if wFile.Path = f; wFile.Path == "" {
+		wFile.Path = p.defaultPaths[runtime.GOOS]
 	}
 	// Output Wam file data to the wam.json file
 	return wFile.Write(fpath)
 }
 
-/*
-GetData returns an addon data object parsed from Curse using a Curse addon id.
-*/
-func (u *Utils) GetData(id string) (*addon.Data, error) {
-	// Parse id an obtain addon data from Curse
-	data, err := u.parseCurse(id)
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
-}
-
-/*
-Install downloads, extracts and installs an addon from Curse using a Curse
-addon id. Return an error if one occured.
-*/
-func (u *Utils) Install(id string) error {
+// Install downloads, extracts and installs an addon from Curse using a Curse
+// addon id.
+// Return an error if one occurred.
+func (p *Parser) Install(id string) error {
 	// Obtain the executable directory
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
@@ -89,25 +86,25 @@ func (u *Utils) Install(id string) error {
 	// Name and full path of the addon zip file based on the id
 	fpath := fmt.Sprintf("%s/%s.zip", dir, id)
 	// Parse id and obtain addon data from Curse
-	data, err := u.parseCurse(id)
+	data, err := p.parseCurse(id)
 	if err != nil {
 		return err
 	}
 	// Download the addon zip file using the URL link
-	if err = u.downloadZip(data.URL, fpath); err != nil {
+	if err = p.downloadZip(data.URL, fpath); err != nil {
 		return err
 	}
 	// Extract the zip file to a tmp folder
-	if err = u.extractZip(fpath, wFile.Path); err != nil {
+	if err = p.extractZip(fpath, wFile.Path); err != nil {
 		return err
 	}
 	// Delete the downloaded zip file from the tmp folder
 	return os.Remove(fpath)
 }
 
-func (u *Utils) parseCurse(id string) (*addon.Data, error) {
+func (p *Parser) parseCurse(id string) (*addon.Data, error) {
 	// Resolve the addon page from Curse
-	doc, err := goquery.NewDocument(fmt.Sprintf(u.addonURL, id))
+	doc, err := goquery.NewDocument(fmt.Sprintf(p.addonURL, id))
 	if err != nil {
 		return nil, err
 	}
@@ -125,16 +122,16 @@ func (u *Utils) parseCurse(id string) (*addon.Data, error) {
 		return nil, err
 	}
 	// Parse download link and obtain the file url of the addon
-	dDoc, err := goquery.NewDocument(fmt.Sprintf(u.addonURL, id) + "/download")
+	dDoc, err := goquery.NewDocument(fmt.Sprintf(p.addonURL, id) + "/download")
 	if err != nil {
 		return nil, err
 	}
 	dlPart, _ := dDoc.Find("a.download__link").Attr("href")
-	l := fmt.Sprintf(u.addonURL, strings.Split(dlPart, "/wow/addons/")[1])
+	l := fmt.Sprintf(p.addonURL, strings.Split(dlPart, "/wow/addons/")[1])
 	return &addon.Data{Name: n, DateEpoch: e, Version: v, URL: l}, nil
 }
 
-func (u *Utils) downloadZip(src, dest string) error {
+func (p *Parser) downloadZip(src, dest string) error {
 	// Obtain file's contents from src using a GET request
 	res, err := http.Get(src)
 	if err != nil {
@@ -154,7 +151,7 @@ func (u *Utils) downloadZip(src, dest string) error {
 	return nil
 }
 
-func (u *Utils) extractZip(src, dest string) error {
+func (p *Parser) extractZip(src, dest string) error {
 	// Open zip file for reading
 	r, err := zip.OpenReader(src)
 	if err != nil {

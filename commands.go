@@ -1,4 +1,4 @@
-package cmd
+package main
 
 import (
 	"fmt"
@@ -8,21 +8,21 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/olekukonko/tablewriter"
-	"github.com/salindersidhu/wam/cmd/addon"
-	"github.com/salindersidhu/wam/cmd/curse"
+	"github.com/salindersidhu/wam/addon"
+	"github.com/salindersidhu/wam/curse"
 	"github.com/urfave/cli"
 )
 
 // CommandWrapper wraps dependencies used by CLI commands
 type CommandWrapper struct {
-	utils addon.Utils
+	parser addon.Parser
 }
 
 // Commands returns an array of CLI commands
 func Commands() []cli.Command {
 	// Create dependencies and Wrapper
-	u := curse.NewUtils()
-	w := CommandWrapper{utils: u}
+	p := curse.NewParser()
+	w := CommandWrapper{parser: p}
 	// Return array of CLI commands
 	return []cli.Command{
 		cli.Command{
@@ -43,16 +43,6 @@ func Commands() []cli.Command {
 	}
 }
 
-func (w *CommandWrapper) doInit(c *cli.Context) {
-	w.fprintcInfo("Creating addon profile...\n")
-	// Obtain path from argument (if any) and create addon profile
-	if err := w.utils.Init(c.Args().First()); err != nil {
-		w.fprintcError("%s\n", err.Error())
-		return
-	}
-	w.fprintcOk("Profile created in %s\n", color.YellowString("wam.json"))
-}
-
 func (w *CommandWrapper) doGet(c *cli.Context) {
 	var notFound []string
 	var addonTable [][]string
@@ -65,7 +55,7 @@ func (w *CommandWrapper) doGet(c *cli.Context) {
 	}
 	for _, arg := range c.Args() {
 		// Attempt to get addon data for each curse id
-		data, err := w.utils.GetData(arg)
+		data, err := w.parser.GetData(arg)
 		if err != nil {
 			// If an error occured, add id to not found list
 			notFound = append(notFound, color.MagentaString(arg))
@@ -90,11 +80,21 @@ func (w *CommandWrapper) doGet(c *cli.Context) {
 	}
 }
 
+func (w *CommandWrapper) doInit(c *cli.Context) {
+	w.fprintcInfo("Creating addon profile...\n")
+	// Obtain path from argument (if any) and create addon profile
+	if err := w.parser.Init(c.Args().First()); err != nil {
+		w.fprintcError("%s\n", err.Error())
+		return
+	}
+	w.fprintcOk("Profile created in %s\n", color.YellowString("wam.json"))
+}
+
 func (w *CommandWrapper) doInstall(c *cli.Context) {
 	for _, arg := range c.Args() {
 		w.fprintcInfo("Installing %s...\n", color.MagentaString(arg))
 		// Install addon
-		if err := w.utils.Install(arg); err != nil {
+		if err := w.parser.Install(arg); err != nil {
 			w.fprintcError("%s\n", err.Error())
 			continue
 		}
