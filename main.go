@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/salindersidhu/wam/cmd"
 	"github.com/urfave/cli"
 )
 
@@ -24,7 +25,7 @@ func main() {
 	app.Usage = "Install and remove World of Warcraft addons"
 
 	// Assign cli commands
-	app.Commands = Commands()
+	app.Commands = cmd.commands()
 
 	app.Run(os.Args)
 }
