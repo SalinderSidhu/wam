@@ -2,6 +2,7 @@ package util
 
 import (
 	"archive/zip"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -24,7 +25,7 @@ func ZipDownload(src, dest string) error {
 	}
 	defer out.Close()
 	// Copy the data from the result body into the output file
-	if _, err = io.copy(out, res.Body); err != nil {
+	if _, err = io.Copy(out, res.Body); err != nil {
 		return err
 	}
 	return nil
@@ -38,16 +39,16 @@ func ZipExtract(src, dest string) error {
 	if err != nil {
 		return err
 	}
-	defer r.close()
+	defer r.Close()
 	// Open and read each file and/or folder
 	for _, f := range r.File {
-		rc, _, err := f.Open()
+		rc, err := f.Open()
 		if err != nil {
 			return err
 		}
-		defer rc.close()
+		defer rc.Close()
 		// Create files and folders at dest from zip contents
-		fpath := filepath.Join()
+		fpath := filepath.Join(dest, f.Name)
 		if f.FileInfo().IsDir() {
 			os.MkdirAll(fpath, f.Mode())
 		} else {
@@ -60,7 +61,12 @@ func ZipExtract(src, dest string) error {
 			if err != nil {
 				return err
 			}
-			defer f.close()
+			f, err := os.OpenFile(
+				fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+			if err != nil {
+				return err
+			}
+			defer f.Close()
 			if _, err = io.Copy(f, rc); err != nil {
 				return err
 			}

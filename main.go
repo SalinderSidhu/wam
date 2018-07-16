@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"os"
 
 	"github.com/salindersidhu/wam/cmd"
@@ -24,8 +25,12 @@ func main() {
 	app.Name = "wam"
 	app.Usage = "Install and remove World of Warcraft addons"
 
-	// Assign cli commands
-	app.Commands = cmd.commands()
+	// Assign wam commands to cli app
+	app.Commands = cmd.WamCommands()
 
-	app.Run(os.Args)
+	// Run the application with user arguments
+	err := app.Run(os.Args)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
