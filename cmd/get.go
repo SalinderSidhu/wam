@@ -29,7 +29,7 @@ func doGet(ctx *cli.Context) {
 	}
 	for _, arg := range ctx.Args() {
 		// Attempt to get addon data for each curse id
-		data, err := addon.InitMetadata(arg)
+		data, err := curse.InitMetadata(arg)
 		if err != nil {
 			// If an error occurred, add id to not found list
 			notFound = append(notFound, color.MagentaString(arg))
