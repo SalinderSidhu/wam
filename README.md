@@ -1,4 +1,5 @@
 # WAM
+[![Build Status](https://travis-ci.org/salindersidhu/wam.svg?branch=master)](https://travis-ci.org/salindersidhu/wam)
 [![Go Report Card](https://goreportcard.com/badge/github.com/salindersidhu/wam)](https://goreportcard.com/report/github.com/salindersidhu/wam)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](/LICENSE.md)
 
@@ -15,15 +16,6 @@ A World of Warcraft addon manager CLI tool built using Go.
 
 ## Requirements
 * [`The Go Programming Language`](https://golang.org/)
-
-This application requires the following go packages:
-
-```bash
-go get github.com/urfave/cli
-go get github.com/fatih/color
-go get github.com/PuerkitoBio/goquery
-go get github.com/olekukonko/tablewriter
-```
 
 ## Building
 Install the above Go packages and type `make` to compile the binary.
