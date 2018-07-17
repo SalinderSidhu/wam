@@ -95,4 +95,3 @@ Before submitting your bug report, please ensure that your ticket contains the f
 - A short summary of the bug, typically 1 or 2 sentences.
 - A screenshot showing the bug.
 - The version of wam you are using.
-- A list of other addons that you are using.

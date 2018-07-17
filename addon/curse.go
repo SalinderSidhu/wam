@@ -23,7 +23,7 @@ func NewCurse() Addon {
 	return &Curse{
 		Source: "https://www.curseforge.com/wow/addons/%s",
 		DefaultPaths: map[string]string{
-			"windows": "C:/Program Files (x86)/World of Warcraft/Interface/AddOns",
+			"windows": "C:/Program Files/World of Warcraft/Interface/AddOns",
 			"darwin":  "/Applications/Battle.net/World of Warcraft/Interface/AddOns",
 		},
 	}
