@@ -1,0 +1,74 @@
+package addon
+
+import (
+	"fmt"
+	"strconv"
+	"strings"
+
+	"github.com/PuerkitoBio/goquery"
+)
+
+// Curse represents the corresponding interface from addon.Addon
+type Curse struct {
+	Source string
+}
+
+// NewCurse creates an instance of Curse.
+func NewCurse() Addon {
+	return &Curse{
+		Source: "https://www.curseforge.com/wow/addons/%s",
+	}
+}
+
+// InitMetadata returns the metadata object of an addon parsed from Curse where
+// the curse addon id is specified by id. Return an error if one occurred.
+func (c *Curse) InitMetadata(id string) (*Metadata, error) {
+	data, err := c.parseCurse(id)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+// InitProfile creates a new addon profile (wam.json) with the World of
+// Warcraft installation path specified by fpath. Return an error if one
+// occurred.
+func (c *Curse) InitProfile(fpath string) error {
+	return nil
+}
+
+// Install downloads, extracts and installs an addon from Curse using a Curse
+// addon id. Return an error if one occurred.
+func (c *Curse) Install(id string) error {
+	return nil
+}
+
+func (c *Curse) parseCurse(id string) (*Metadata, error) {
+	// Resolve the addon page from Curse
+	doc, err := goquery.NewDocument(fmt.Sprintf(c.Source, id))
+	if err != nil {
+		return nil, err
+	}
+	// Check for 404 page if the Curse addon was not found
+	h := doc.Find("h2").First().Text()
+	if h == "Not found" {
+		return nil, fmt.Errorf("%s not found on Curse", id)
+	}
+	// Parse specific information from the page
+	n := doc.Find("#content section header h2").First().Text()
+	v := strings.Split(doc.Find(".stats--game-version").First().Text(), ": ")[1]
+	d, _ := doc.Find(".stats--last-updated abbr").Attr("data-epoch")
+
+	e, err := strconv.ParseInt(d, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	// Parse download link and obtain the file url of the addon
+	dDoc, err := goquery.NewDocument(fmt.Sprintf(c.Source, id) + "/download")
+	if err != nil {
+		return nil, err
+	}
+	dlPart, _ := dDoc.Find("a.download__link").Attr("href")
+	l := fmt.Sprintf(c.Source, strings.Split(dlPart, "/wow/addons/")[1])
+	return &Metadata{Name: n, Date: e, Version: v, Source: l}, nil
+}
