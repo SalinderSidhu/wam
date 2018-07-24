@@ -8,8 +8,7 @@
 *.so
 *.dylib
 
-# Dependencies and output
-/bin
+# Dependencies
 /vendor
 
 # Test binary, build with `go test -c`

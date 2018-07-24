@@ -8,6 +8,7 @@ A World of Warcraft addon manager CLI tool built using Go.
 * [Getting Started](#getting-started)
     * [Requirements](#requirements)
     * [Building](#building)
+    * [installing](#installing)
 * [Contributing](#contributing)
 
 # Getting Started
@@ -19,23 +20,28 @@ A World of Warcraft addon manager CLI tool built using Go.
 ## Building
 If you're using Windows, please download and install the **make** tool for Git Bash.
 
-Install the required GO packages and update dependencies for this project:
+Install required GO packages and update dependencies for this project:
 ```bash
-# Installs dep tool when executed for the first time
+# Installs the dep tool when executed for the first time
 make setup
 ```
 
-Compile the project for your OS and output to bin folder:
+Compile the project for your OS and output the binary to your current working folder:
 ```bash
-make
+make build
 ```
 
-Clean compiled project:
+Clean the compiled project:
 ```bash
 make clean
 ```
 
-*Fore more info on Go commands, please visit the [Offical Documentation](https://golang.org/cmd/go/#hdr-Compile_packages_and_dependencies).*
+## Installing
+
+Install the project as a standalone tool to the go path binary folder:
+```bash
+make install
+```
 
 # Contributing
 Wam welcomes contributions from anyone and everyone. Please see our [contributing guide](/CONTRIBUTING.md) for more info.
