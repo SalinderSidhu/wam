@@ -2,14 +2,14 @@
 .vscode/*
 
 # Binaries for programs and plugins
-/bin
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
 
-# Dependencies
+# Dependencies and output
+/bin
 /vendor
 
 # Test binary, build with `go test -c`

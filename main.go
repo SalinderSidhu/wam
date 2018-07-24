@@ -10,9 +10,9 @@ import (
 
 // Variables to identify the build
 var (
-	Author  string
-	Email   string
-	Version string
+	Owner string
+	Email string
+	Ver   string
 )
 
 func main() {
@@ -20,8 +20,8 @@ func main() {
 
 	// Assign cli app fields
 	app.Email = Email
-	app.Author = Author
-	app.Version = Version
+	app.Author = Owner
+	app.Version = Ver
 	app.Name = "wam"
 	app.Usage = "Install and remove World of Warcraft addons"
 
