@@ -25,6 +25,7 @@ ifeq ($(shell uname -s), Darwin)
 else
 	curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 endif
+	dep init
 endif
 	dep ensure -vendor-only
 .PHONY: setup

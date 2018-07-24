@@ -8,8 +8,10 @@
 *.so
 *.dylib
 
-# Dependencies
+# Go dep files
 /vendor
+Gopkg.lock
+Gopkg.toml
 
 # Test binary, build with `go test -c`
 *.test
