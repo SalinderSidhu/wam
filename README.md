@@ -8,7 +8,7 @@ A World of Warcraft addon manager CLI tool built using Go.
 * [Getting Started](#getting-started)
     * [Requirements](#requirements)
     * [Building](#building)
-    * [installing](#installing)
+    * [Installing](#installing)
 * [Contributing](#contributing)
 
 # Getting Started

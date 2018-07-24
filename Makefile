@@ -1,8 +1,8 @@
 SEMVER=0.5.0
 
-VER=$(SEMVER) HASH_$(shell git rev-parse HEAD | cut -c 1-10 | tr a-z A-Z)
 OWNER=$(shell git log -1 --pretty=format:'%an')
 EMAIL=$(shell git log -1 --pretty=format:'%ae')
+VER=$(SEMVER) HASH_$(shell git rev-parse HEAD | cut -c 1-10 | tr a-z A-Z)
 LDFLAGS='-X "main.Owner=$(OWNER)" -X "main.Email=$(EMAIL)" -X "main.Ver=$(VER)"'
 
 all: clean setup install
