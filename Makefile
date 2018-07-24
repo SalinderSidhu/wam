@@ -1,22 +1,35 @@
-# Configurable variables
-SEMVER=0.0.9
-FOLDER=bin
-BINARY=wam.exe
+SEMVER=0.5.0
 
-# Required variables for the binary and LDFLAGS for the compiler
-VERSION:=$(SEMVER) hash_$(shell git rev-parse HEAD | cut -c1-10)
-AUTHOR=$(shell git log -1 --pretty=format:'%an')
+VER=$(SEMVER) HASH_$(shell git rev-parse HEAD | cut -c 1-10 | tr a-z A-Z)
+OWNER=$(shell git log -1 --pretty=format:'%an')
 EMAIL=$(shell git log -1 --pretty=format:'%ae')
+LDFLAGS='-X "main.Owner=$(OWNER)" -X "main.Email=$(EMAIL)" -X "main.Ver=$(VER)"'
 
-LDFLAGS='-X "main.Author=$(AUTHOR)" -X "main.Email=$(EMAIL)" -X "main.Version=$(VERSION)"'
+all: clean setup install
 
-# Build the binary
-all: clean 
-	go build -o $(FOLDER)/$(BINARY) -ldflags $(LDFLAGS) *.go
+# Build the project
+build: clean
+	go build -ldflags $(LDFLAGS) *.go
+.PHONY: build
 
-# Clean the project
+# Install the project to the go path
+install: clean
+	go install -ldflags $(LDFLAGS) *.go
+.PHONY: install
+
+# Setup required dependencies for the project
+setup:
+ifeq (, $(shell dep version 2>/dev/null))
+ifeq ($(shell uname -s), Darwin)
+	brew install dep
+else
+	curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+endif
+endif
+	dep ensure -vendor-only
+.PHONY: setup
+
+# Remove the compiled project
 clean:
 	go clean
-	rm -rf ./$(FOLDER)
-
 .PHONY: clean

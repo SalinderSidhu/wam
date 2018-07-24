@@ -8,6 +8,9 @@
 *.so
 *.dylib
 
+# Dependencies
+/vendor
+
 # Test binary, build with `go test -c`
 *.test
 
