@@ -1,4 +1,4 @@
-SEMVER=0.5.0
+SEMVER=0.5.1
 
 OWNER=$(shell git log -1 --pretty=format:'%an')
 EMAIL=$(shell git log -1 --pretty=format:'%ae')
@@ -33,4 +33,5 @@ endif
 # Remove the compiled project
 clean:
 	go clean
+	rm -f wam.json
 .PHONY: clean
