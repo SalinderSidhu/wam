@@ -107,9 +107,9 @@ func (c *Curse) parseCurse(id string) (*Metadata, error) {
 		return nil, fmt.Errorf("%s not found on Curse", id)
 	}
 	// Parse specific information from the page
-	n := doc.Find("#content section header h2").First().Text()
-	v := strings.Split(doc.Find(".stats--game-version").First().Text(), ": ")[1]
-	d, _ := doc.Find(".stats--last-updated abbr").Attr("data-epoch")
+	n := doc.Find("h2.font-bold.text-lg.break-all").First().Text()
+	v := strings.Split(doc.Find("div.flex > span:nth-child(3)").First().Text(), ": ")[1]
+	d, _ := doc.Find("span.mr-2.text-gray-500 abbr").Attr("data-epoch")
 
 	e, err := strconv.ParseInt(d, 10, 64)
 	if err != nil {
@@ -120,7 +120,7 @@ func (c *Curse) parseCurse(id string) (*Metadata, error) {
 	if err != nil {
 		return nil, err
 	}
-	dlPart, _ := dDoc.Find("a.download__link").Attr("href")
+	dlPart, _ := dDoc.Find("p.text-sm a").Attr("href")
 	l := fmt.Sprintf(c.Source, strings.Split(dlPart, "/wow/addons/")[1])
 	return &Metadata{Name: n, Date: e, Version: v, Source: l}, nil
 }
